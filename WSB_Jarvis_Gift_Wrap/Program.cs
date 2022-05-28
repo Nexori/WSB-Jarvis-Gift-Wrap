@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace WSB_Jarvis_Gift_Wrap
 {
     internal static class Program
@@ -16,7 +17,7 @@ namespace WSB_Jarvis_Gift_Wrap
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new MainForm());
         }
     }
 }
