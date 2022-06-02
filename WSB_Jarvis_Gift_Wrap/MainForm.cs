@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.Threading;
 using JarvisAlgorithmLib;
 
@@ -11,7 +12,8 @@ namespace WSB_Jarvis_Gift_Wrap
     {
         private Graphics _graphics;
         private LinkedList<Point> _points;
-
+        private LinkedList<Point> _convexHullPoints;
+        private LinkedList<Point> _convexHulltoDraw;
         private Pen _convexHullPen;
         private Pen _pointPen;
         private Pen _searchPen;
@@ -26,7 +28,8 @@ namespace WSB_Jarvis_Gift_Wrap
             _pointBrush = new SolidBrush(Color.Black);
             _searchPen = new Pen(Color.Blue, width: 10);
             _pointCount = (int)e_pointsCount.Value;
-            _points = new LinkedList<Point>();
+            _points = new LinkedList<Point>(); 
+            
         }
 
         private void WipePictureBox()
@@ -40,9 +43,10 @@ namespace WSB_Jarvis_Gift_Wrap
             pictureBox.Invalidate(); //Redraw
         }
 
-        private void RedrawPoints()
+        private void RedrawPoints(bool wipe)
         {
-            WipePictureBox();
+            if (wipe == true)
+                WipePictureBox();
             foreach (var p in _points) 
                 _graphics.FillCircle(_pointBrush,p.X,p.Y,5);
             pictureBox.Invalidate();
@@ -55,20 +59,22 @@ namespace WSB_Jarvis_Gift_Wrap
 
             var convexHullPts =  JarvisAlgorithm.getConvexHull(_points);
             var firstPoint = convexHullPts.First;
-
+            
+            // Draw everything if step by step is disabled
             while (firstPoint.Next != null)
             {
                 _graphics.DrawLine(_convexHullPen, firstPoint.Value, firstPoint.Next.Value);
                 firstPoint = firstPoint.Next;
             }
-
             _graphics.DrawLine(_convexHullPen, firstPoint.Value, convexHullPts.First.Value);
+            RedrawPoints(false);
             pictureBox.Invalidate();
+            
         }
 
         private void b_Reset_Click(object sender, EventArgs e)
         {
-            RedrawPoints();
+            RedrawPoints(true);
         }
 
         private void b_Wipe_Click(object sender, EventArgs e)
@@ -85,7 +91,7 @@ namespace WSB_Jarvis_Gift_Wrap
             {
                 _points.AddLast(new Point(r.Next(0, pictureBox.Width), r.Next(0, pictureBox.Height)));
             }
-            RedrawPoints();
+            RedrawPoints(true);
         }
 
 
@@ -94,12 +100,12 @@ namespace WSB_Jarvis_Gift_Wrap
         {
             if (chk_step_by_step.Checked)
             {
-                slidebar_sim_speed.Enabled = false;
+                slidebar_vizualization_speed.Enabled = false;
             }
         
             else 
             {
-                slidebar_sim_speed.Enabled = true;
+                slidebar_vizualization_speed.Enabled = true;
             }
         }
 
@@ -138,6 +144,8 @@ namespace WSB_Jarvis_Gift_Wrap
             pictureBox.BackColor = Color.White;
             pictureBox.Image = new Bitmap(pictureBox.Width, pictureBox.Height);
             _graphics = Graphics.FromImage(pictureBox.Image);
+            _graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            _graphics.SmoothingMode = SmoothingMode.HighQuality;
         }
 
         private void e_pointsCount_ValueChanged(object sender, EventArgs e)

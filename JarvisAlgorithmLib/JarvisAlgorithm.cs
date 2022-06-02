@@ -57,7 +57,7 @@ namespace JarvisAlgorithmLib
             _points = new LinkedList<Point>(points);
             _convexHull = new LinkedList<Point>();
             var lastPoint = getBottomPoint();
-
+            _convexHull.AddLast(lastPoint);
             // Get the convex loop 
             while (true)
             {
