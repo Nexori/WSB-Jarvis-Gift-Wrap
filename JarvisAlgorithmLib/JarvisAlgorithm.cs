@@ -13,7 +13,7 @@ namespace JarvisAlgorithmLib
 
         private static LinkedList<Point> _points;
         private static LinkedList<Point> _convexHull;
-
+        private static List<List<Point>> _accessOrder;
         private static Point getBottomPoint()
         {
             // Idea is to iterate through whole list to get the lowest point possible. Needs at least 2 points.
@@ -53,7 +53,7 @@ namespace JarvisAlgorithmLib
         {
             if (points.Count <= 2)
                 return points;
-
+            _accessOrder = new List<List<Point>>();
             _points = new LinkedList<Point>(points);
             _convexHull = new LinkedList<Point>();
             var lastPoint = getBottomPoint();
@@ -62,9 +62,14 @@ namespace JarvisAlgorithmLib
             while (true)
             {
                 var currentPoint = _points.First.Value;
+                List<Point> currentIteration = new List<Point>();
+
                 foreach (var iteratedPoint in _points)
+                {
                     if (getDirection(lastPoint, currentPoint, iteratedPoint) == Direction.Left)
                         currentPoint = iteratedPoint;
+                    currentIteration.Add(iteratedPoint);
+                }
 
                 // If current point is the same as the first point of the convex hull, it means we have a circle.
                 if (currentPoint == _convexHull.First.Value)
@@ -78,6 +83,9 @@ namespace JarvisAlgorithmLib
 
                 // Update lastPoint for next iteration
                 lastPoint = currentPoint;
+
+                // Save current iteration 
+                _accessOrder.Add(currentIteration);
             }
             return _convexHull;
         }

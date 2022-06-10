@@ -18,8 +18,9 @@ namespace WSB_Jarvis_Gift_Wrap
         private Pen _pointPen;
         private Pen _searchPen;
         private Brush _pointBrush;
-
+        private int _currentPointIndex;
         private int _pointCount;
+        private int _speedDivider;
 
         public MainForm()
         {
@@ -28,10 +29,27 @@ namespace WSB_Jarvis_Gift_Wrap
             _pointBrush = new SolidBrush(Color.Black);
             _searchPen = new Pen(Color.Blue, width: 10);
             _pointCount = (int)e_pointsCount.Value;
-            _points = new LinkedList<Point>(); 
-            
+            _points = new LinkedList<Point>();
+            _convexHullPoints = new LinkedList<Point>();
+            _currentPointIndex = 0;
         }
 
+        private void drawLines()
+        {
+            var firstPoint = _convexHullPoints.First;
+            // Draw everything if step by step is disabled
+            while (firstPoint.Next != null)
+            {
+                _graphics.DrawLine(_convexHullPen, firstPoint.Value, firstPoint.Next.Value);
+                firstPoint = firstPoint.Next;
+                
+            }
+            //Draw the final line to close the circle
+            _graphics.DrawLine(_convexHullPen, firstPoint.Value, _convexHullPoints.First.Value);
+            RedrawPoints(false);
+            pictureBox.Invalidate(); //Redraw
+        }
+        
         private void WipePictureBox()
         {
             using (var b = new SolidBrush(Color.White))
@@ -57,17 +75,9 @@ namespace WSB_Jarvis_Gift_Wrap
             if (_points.Count < 3)
                 return;
 
-            var convexHullPts =  JarvisAlgorithm.getConvexHull(_points);
-            var firstPoint = convexHullPts.First;
-            
-            // Draw everything if step by step is disabled
-            while (firstPoint.Next != null)
-            {
-                _graphics.DrawLine(_convexHullPen, firstPoint.Value, firstPoint.Next.Value);
-                firstPoint = firstPoint.Next;
-            }
-            _graphics.DrawLine(_convexHullPen, firstPoint.Value, convexHullPts.First.Value);
-            RedrawPoints(false);
+            _convexHullPoints =  JarvisAlgorithm.getConvexHull(_points);
+            _currentPointIndex = _convexHullPoints.Count;
+            drawLines();
             pictureBox.Invalidate();
             
         }
@@ -94,35 +104,28 @@ namespace WSB_Jarvis_Gift_Wrap
             RedrawPoints(true);
         }
 
-
-
-        private void chk_step_by_step_CheckedChanged(object sender, EventArgs e)
-        {
-            if (chk_step_by_step.Checked)
-            {
-                slidebar_vizualization_speed.Enabled = false;
-            }
-        
-            else 
-            {
-                slidebar_vizualization_speed.Enabled = true;
-            }
-        }
-
         private void b_NextStep_Click(object sender, EventArgs e)
         {
+            if (_convexHullPoints.Count < _currentPointIndex)
+            {
+                _currentPointIndex++;
+            }
         }
 
         private void b_prevStep_Click(object sender, EventArgs e)
         {
-
+            if (_convexHullPoints.Count > 0)
+            {
+                _currentPointIndex--;
+            }
         }
-        private void chk_speed_ctrl_CheckedChanged(object sender, EventArgs e)
+
+        private void chk_viz_enable(object sender, EventArgs e)
         {
 
         }
 
-        private void slidebar_sim_speed_Scroll(object sender, EventArgs e)
+        private void slidebar_viz_speed(object sender, EventArgs e)
         {
 
         }
@@ -154,11 +157,6 @@ namespace WSB_Jarvis_Gift_Wrap
             {
                 _pointCount = (int)e_pointsCount.Value;
             }
-        }
-
-        private void chk_speed_ctrl_CheckStateChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
