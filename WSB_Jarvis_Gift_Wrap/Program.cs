@@ -15,6 +15,7 @@ namespace WSB_Jarvis_Gift_Wrap
         [STAThread]
         static void Main()
         {
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

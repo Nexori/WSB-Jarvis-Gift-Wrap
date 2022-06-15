@@ -5,118 +5,204 @@ using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Threading;
 using JarvisAlgorithmLib;
+using System.Diagnostics;
+using System.Linq;
 
 namespace WSB_Jarvis_Gift_Wrap
 {
     public partial class MainForm : Form
     {
         private Graphics _graphics;
-        private LinkedList<Point> _points;
-        private LinkedList<Point> _convexHullPoints;
         private LinkedList<Point> _convexHulltoDraw;
+        
+        private Brush _convexHullBrush;
         private Pen _convexHullPen;
-        private Pen _pointPen;
-        private Pen _searchPen;
+
         private Brush _pointBrush;
-        private int _currentPointIndex;
-        private int _pointCount;
+
+        private Brush _searchBrush;
+        private Pen _searchPen;
+
+        private Brush _csearchBrush;
+        private Pen _csearchPen;
+
+        private int _vizualizationIteration;
         private int _speedDivider;
+
+        private PlotData _plotData;
 
         public MainForm()
         {
             InitializeComponent();
             _convexHullPen = new Pen(Color.Crimson, width: 5);
-            _pointBrush = new SolidBrush(Color.Black);
-            _searchPen = new Pen(Color.Blue, width: 10);
-            _pointCount = (int)e_pointsCount.Value;
-            _points = new LinkedList<Point>();
-            _convexHullPoints = new LinkedList<Point>();
-            _currentPointIndex = 0;
-        }
+            _convexHullBrush = new SolidBrush(Color.Crimson);
 
-        private void drawLines()
+            _searchBrush= new SolidBrush(Color.LimeGreen);
+            _searchPen = new Pen(Color.LimeGreen, width: 2);
+
+            _csearchBrush = new SolidBrush(Color.Yellow);
+            _csearchPen = new Pen(Color.Yellow, width: 1);
+
+            _pointBrush = new SolidBrush(Color.White);
+            
+            _plotData = new PlotData();
+            _plotData.convexHull = new LinkedList<Point>();
+            _plotData.points = new LinkedList<Point>();
+            _plotData.accessOrder = new List<LinkedList<Point>>();
+            _vizualizationIteration = 0;
+
+
+        }
+        private void DrawSolution(
+            PlotData plotData, 
+            Brush chPointBrush, 
+            Brush pointBrush, 
+            Pen chLinePen, 
+            int currentStep, 
+            Brush sPointBrush,
+            Pen sLinePen,
+            Brush csPointBrush,
+            Pen csLinePen)
         {
-            var firstPoint = _convexHullPoints.First;
-            // Draw everything if step by step is disabled
-            while (firstPoint.Next != null)
+            WipePictureBox(); // Wyczyść płutno
+            // Jeśli wizualizacja jest wyłączona, rysuj normalnie, to rysuj krok po kroku.
+            if (ckh_vizualization.Checked == false){
+                // Rysowanie linii z otoczki:
+                var firstPoint = plotData.convexHull.First;
+                while (firstPoint.Next != null)     // Dopóki nie natkenliśmy się na ostatni punkt, rysuj
+                {
+                    _graphics.DrawLine(_convexHullPen, firstPoint.Value, firstPoint.Next.Value);
+                    firstPoint = firstPoint.Next;
+                }
+                _graphics.DrawLine(chLinePen, firstPoint.Value, plotData.convexHull.First.Value); //Dorysuj ostatnią linię
+                
+                // Narysuj punkty i punkty z otoczki
+                foreach (var p in plotData.points)
+                    _graphics.FillCircle(pointBrush, p.X, p.Y, 5); // Rysuj normalne punkty
+                foreach (var p in plotData.convexHull)
+                    _graphics.FillCircle(chPointBrush, p.X, p.Y, 5); // Rysuj punkty należące do otoczki
+            }
+            else if (slidebar_anim_speed.Value == 0) // Tryb manualny, "krok po kroku".
             {
-                _graphics.DrawLine(_convexHullPen, firstPoint.Value, firstPoint.Next.Value);
-                firstPoint = firstPoint.Next;
+                var currentIteration = plotData.accessOrder.First().First;
+                var currentPoint = plotData.convexHull.First;
+
+                for (int i = 0; i < currentIteration.List.Count; i++)
+                {
+                    for (int j = 0; j < currentPoint.List.Count; j++)
+                    {
+                        _graphics.DrawLine(sLinePen, currentIteration.Value, currentPoint.Value);
+                        _graphics.FillCircle(sPointBrush, currentPoint.Value.X, currentPoint.Value.Y, 5);
+                        if (currentPoint.Next != null)
+                            currentPoint = currentPoint.Next;
+                        else break;
+                    }
+                    currentIteration = currentIteration.Next;
+                    if (currentIteration.Next != null)
+                        currentIteration = currentIteration.Next;
+                    else break;
+                }
                 
             }
-            //Draw the final line to close the circle
-            _graphics.DrawLine(_convexHullPen, firstPoint.Value, _convexHullPoints.First.Value);
-            RedrawPoints(false);
-            pictureBox.Invalidate(); //Redraw
+            else // Tryb automatyczny, działający z użyciem opóźnienia
+            {
+
+            }
+            pictureBox.Invalidate(); 
         }
-        
+
+        // Wyczyść płutno
         private void WipePictureBox()
         {
-            using (var b = new SolidBrush(Color.White))
+            using (var b = new SolidBrush(Color.Black))
             {
                 _graphics.FillRectangle(
                     b, 0, 0, pictureBox.Width, pictureBox.Height);
             }
-
             pictureBox.Invalidate(); //Redraw
         }
 
+        // Przerysuj punkty
         private void RedrawPoints(bool wipe)
         {
             if (wipe == true)
                 WipePictureBox();
-            foreach (var p in _points) 
+            foreach (var p in _plotData.points) 
                 _graphics.FillCircle(_pointBrush,p.X,p.Y,5);
-            pictureBox.Invalidate();
+            pictureBox.Invalidate(); 
         }
 
+
+        // Przycisk "Uruchom"
         private void b_Start_Click(object sender, EventArgs e)
         {
-            if (_points.Count < 3)
-                return;
 
-            _convexHullPoints =  JarvisAlgorithm.getConvexHull(_points);
-            _currentPointIndex = _convexHullPoints.Count;
-            drawLines();
+            var timer = new Stopwatch();
+                timer.Start();
+                if (_plotData.points.Count <= 0)
+                    return;
+                _plotData = JarvisAlgorithm.GetConvexHull(_plotData);
+            timer.Stop();
+            var timeElapsed = timer.Elapsed.TotalMilliseconds; 
+            label_timeTaken.Text = (double)timeElapsed + " ms";
+            _vizualizationIteration = _plotData.convexHull.Count;
+            DrawSolution(
+                plotData: _plotData, 
+                chPointBrush: _convexHullBrush, 
+                pointBrush: _pointBrush, 
+                chLinePen: _convexHullPen,
+                currentStep: _vizualizationIteration, 
+                sPointBrush: _searchBrush, 
+                sLinePen: _searchPen,
+                csPointBrush: _csearchBrush,
+                csLinePen: _csearchPen);
+
             pictureBox.Invalidate();
             
         }
 
+        // Przycisk "Reset"
         private void b_Reset_Click(object sender, EventArgs e)
         {
             RedrawPoints(true);
         }
 
+        // Przycisk "Wyczyść"
         private void b_Wipe_Click(object sender, EventArgs e)
         {
             WipePictureBox();
-            _points.Clear();
+            _plotData.points.Clear();
+            _plotData.convexHull.Clear();
+            _plotData.accessOrder.Clear();
         }
 
+        // Punkty, przycisk "generuj"
         private void b_GeneratePts_Click(object sender, EventArgs e)
         {
             Random r = new Random();
-            _points.Clear();
-            for (int i = 0; i < _pointCount; i++)
+            _plotData.points.Clear();
+            for (int i = 0; i < e_pointsCount.Value; i++)
             {
-                _points.AddLast(new Point(r.Next(0, pictureBox.Width), r.Next(0, pictureBox.Height)));
+                _plotData.points.AddLast(new Point(r.Next(0, pictureBox.Width), r.Next(0, pictureBox.Height)));
             }
             RedrawPoints(true);
         }
 
+        // Wizualizcja, przycisk "następny krok"
         private void b_NextStep_Click(object sender, EventArgs e)
         {
-            if (_convexHullPoints.Count < _currentPointIndex)
+            if (_plotData.convexHull.Count < _vizualizationIteration)
             {
-                _currentPointIndex++;
+                _vizualizationIteration++;
             }
         }
 
+        // Wizualizcja, przycisk "poprzedni krok"
         private void b_prevStep_Click(object sender, EventArgs e)
         {
-            if (_convexHullPoints.Count > 0)
+            if (_plotData.convexHull.Count > 0)
             {
-                _currentPointIndex--;
+                _vizualizationIteration--;
             }
         }
 
@@ -130,13 +216,14 @@ namespace WSB_Jarvis_Gift_Wrap
 
         }
 
+        // Akcja przy kliknięciu w płutno
         private void pictureBox_Click(object sender, MouseEventArgs e)
         {
             var newPoint = new Point(e.X, e.Y);
-            if (_points.Contains(newPoint)) //Stop if point already exists at that place
+            if (_plotData.points.Contains(newPoint)) //Stop if point already exists at that place
                 return;
 
-            _points.AddLast(newPoint);
+            _plotData.points.AddLast(newPoint);
 
             _graphics.FillCircle(_pointBrush, newPoint.X, newPoint.Y,5);
             pictureBox.Invalidate();
@@ -144,19 +231,25 @@ namespace WSB_Jarvis_Gift_Wrap
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
-            pictureBox.BackColor = Color.White;
+            pictureBox.BackColor = Color.Black;
             pictureBox.Image = new Bitmap(pictureBox.Width, pictureBox.Height);
             _graphics = Graphics.FromImage(pictureBox.Image);
             _graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
             _graphics.SmoothingMode = SmoothingMode.HighQuality;
         }
 
-        private void e_pointsCount_ValueChanged(object sender, EventArgs e)
+
+        // Przycisk "utwórz punkt"
+        private void b_createPoint_Click(object sender, EventArgs e)
         {
-            if (e_pointsCount.Value != _pointCount)
-            {
-                _pointCount = (int)e_pointsCount.Value;
-            }
+            var newPoint = new Point((int)e_pCreate_X.Value, (int)e_pCreate_Y.Value);
+            if (_plotData.points.Contains(newPoint))    // Przerwij jeśli punkt już istnieje 
+                return;
+
+            _plotData.points.AddLast(newPoint);         // Dodaj i dorysuj ten punkt
+            _graphics.FillCircle(_pointBrush, newPoint.X, newPoint.Y, 5);
+            pictureBox.Invalidate();
         }
+
     }
 }

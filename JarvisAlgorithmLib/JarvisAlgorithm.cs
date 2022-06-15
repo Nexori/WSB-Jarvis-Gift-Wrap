@@ -4,20 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Numerics;
 
 namespace JarvisAlgorithmLib
 {
-    public static class JarvisAlgorithm
+    public struct PlotData
     {
+        public LinkedList<Point> points;
+        public LinkedList<Point> convexHull;
+        public List<LinkedList<Point>> accessOrder;
+    }
+    public static class JarvisAlgorithm{
         public enum Direction { Left, Right, Straight }
 
-        private static LinkedList<Point> _points;
-        private static LinkedList<Point> _convexHull;
-        private static List<List<Point>> _accessOrder;
-        private static Point getBottomPoint()
+        //private static LinkedList<Point> _points;
+        //private static LinkedList<Point> _convexHull;
+        //private static List<List<Point>> _accessOrder; 
+        
+        private static Point GetBottomPoint(PlotData plotData)
         {
             // Idea is to iterate through whole list to get the lowest point possible. Needs at least 2 points.
-            var currentPoint = _points.First;
+            var currentPoint = plotData.points.First;
             var nextPoint = currentPoint.Next;
             while (nextPoint != null)
             {
@@ -30,8 +37,8 @@ namespace JarvisAlgorithmLib
             }
             return currentPoint.Value;
         }
-
-        public static Direction getDirection(Point a, Point b, Point c)
+        
+        public static Direction GetDirection(Point a, Point b, Point c)
         {
             // Move points b and c to origin to get vector
             var nB = new Point(b.X - a.X, b.Y - a.Y);
@@ -49,45 +56,56 @@ namespace JarvisAlgorithmLib
 
             return Direction.Straight;
         }
-        public static LinkedList<Point> getConvexHull(LinkedList<Point> points)
+
+        public static PlotData GetConvexHull(PlotData plotData)
         {
-            if (points.Count <= 2)
-                return points;
-            _accessOrder = new List<List<Point>>();
-            _points = new LinkedList<Point>(points);
-            _convexHull = new LinkedList<Point>();
-            var lastPoint = getBottomPoint();
-            _convexHull.AddLast(lastPoint);
+
+            // Don't calculate, it does not make sense (output is either line or a point)
+            if (plotData.points.Count <= 2)
+            {
+                plotData.convexHull = plotData.points;
+                plotData.accessOrder.Add(plotData.points);
+                return plotData;
+            }
+
+            //_points = new LinkedList<Point>(points);
+            //_accessOrder = new List<List<Point>>();
+            //_convexHull = new LinkedList<Point>();
+
+            var lastPoint = GetBottomPoint(plotData);
+            plotData.convexHull.AddLast(lastPoint);
             // Get the convex loop 
             while (true)
             {
-                var currentPoint = _points.First.Value;
-                List<Point> currentIteration = new List<Point>();
+                var currentPoint = plotData.points.First.Value;
+                var currentIteration = new LinkedList<Point>();
 
-                foreach (var iteratedPoint in _points)
+                foreach (var iteratedPoint in plotData.points)
                 {
-                    if (getDirection(lastPoint, currentPoint, iteratedPoint) == Direction.Left)
+                    if (GetDirection(lastPoint, currentPoint, iteratedPoint) == Direction.Left)
                         currentPoint = iteratedPoint;
-                    currentIteration.Add(iteratedPoint);
+                    currentIteration.AddLast(iteratedPoint);
                 }
 
                 // If current point is the same as the first point of the convex hull, it means we have a circle.
-                if (currentPoint == _convexHull.First.Value)
+                if (currentPoint == plotData.convexHull.First.Value)
                     break;
 
                 // Add current point to detected convex hull
-                _convexHull.AddLast(currentPoint);
+                plotData.convexHull.AddLast(currentPoint);
 
                 // Remove current point from the general pool of points
-                _points.Remove(currentPoint);
+                plotData.points.Remove(currentPoint);
 
                 // Update lastPoint for next iteration
                 lastPoint = currentPoint;
 
-                // Save current iteration 
-                _accessOrder.Add(currentIteration);
+                // Save current iteration access order 
+                //plotData.accessOrder.
+                plotData.accessOrder.Add(currentIteration);
             }
-            return _convexHull;
+            
+            return plotData;
         }
     }
 }
