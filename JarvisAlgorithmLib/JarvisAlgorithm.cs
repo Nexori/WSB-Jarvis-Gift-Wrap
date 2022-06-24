@@ -94,10 +94,10 @@ namespace JarvisAlgorithmLib
 
                     foreach (var iteratedPoint in plotData.points)
                     {
-                        if (GetDirection(lastPoint, currentPoint, iteratedPoint) == 2)
+                        if (GetDirection(lastPoint, iteratedPoint, currentPoint) == 2)
                             currentPoint = iteratedPoint;
-                        if (GetDirection(lastPoint, currentPoint, iteratedPoint) == 0 &&
-                            isColinear(lastPoint , iteratedPoint, currentPoint) &&
+                        if (GetDirection(lastPoint, iteratedPoint, currentPoint) == 0 &&
+                            isColinear(lastPoint , currentPoint, iteratedPoint) &&
                             iteratedPoint != lastPoint)
                             currentPoint = iteratedPoint;
                         currentIteration.Add(iteratedPoint);

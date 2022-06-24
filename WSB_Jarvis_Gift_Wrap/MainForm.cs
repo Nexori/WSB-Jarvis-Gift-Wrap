@@ -162,7 +162,9 @@ namespace WSB_Jarvis_Gift_Wrap
             _plotData.points = backupPoints;
             if (_isCalculated == false && _plotData.points.Count > 0)
             {
+                _drawIndex = 0;
                 _isCalculated = true;
+
                 var timer = new Stopwatch(); 
                 timer.Start();
                 await Task.Run(() => _plotData = JarvisAlgorithm.GetConvexHull(ref _plotData));
@@ -171,7 +173,6 @@ namespace WSB_Jarvis_Gift_Wrap
 
                 txt_solutionDescription.Text = "";
                 txt_solutionDescription.AppendText("Obliczono w: "+timeElapsed+" ms");
-
                 await DrawSolution(
                     plotData: _plotData,
                     pointBrush: _pointBrush,
