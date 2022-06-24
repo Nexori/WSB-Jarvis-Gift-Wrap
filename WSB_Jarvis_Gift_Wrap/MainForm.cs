@@ -1,45 +1,41 @@
 ﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
 using System.Collections.Generic;
-using System.Drawing.Drawing2D;
-using System.Threading;
-using JarvisAlgorithmLib;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks; 
-using Timer = System.Threading.Timer;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using JarvisAlgorithmLib;
 
 namespace WSB_Jarvis_Gift_Wrap
 {
     public partial class MainForm : Form
     {
-        private Graphics _graphics;
-        
-        private Brush _convexHullBrush;
-        private Pen _convexHullPen;
-
-        private Brush _pointBrush;
-
-        private Brush _searchBrush;
-        private Pen _searchPen;
-
-        private Font _font;
-        private bool _isCalculated;
-        private bool _drawText;
+        private readonly Brush _convexHullBrush;
+        private readonly Pen _convexHullPen;
         private int _drawIndex;
+        private bool _drawText;
+
+        private readonly Font _font;
+        private Graphics _graphics;
+        private bool _isCalculated;
+        private LinkedList<Point> _oldPoints;
 
         private PlotData _plotData;
-        private LinkedList<Point> _oldPoints;
+
+        private readonly Brush _pointBrush;
+
+        private readonly Brush _searchBrush;
+        private readonly Pen _searchPen;
 
         public MainForm()
         {
             InitializeComponent();
-            _convexHullPen = new Pen(Color.Crimson, width: 2);
+            _convexHullPen = new Pen(Color.Crimson, 2);
             _convexHullBrush = new SolidBrush(Color.Crimson);
 
-            _searchBrush= new SolidBrush(Color.Yellow);
-            _searchPen = new Pen(Color.Yellow, width: 1);
+            _searchBrush = new SolidBrush(Color.Yellow);
+            _searchPen = new Pen(Color.Yellow, 1);
 
             _pointBrush = new SolidBrush(Color.White);
 
@@ -52,12 +48,11 @@ namespace WSB_Jarvis_Gift_Wrap
             _plotData = new PlotData();
             _plotData.convexHull = new LinkedList<Point>();
             _plotData.points = new LinkedList<Point>();
-            _plotData.accessOrder = new List<List<Point>>();
+            //_plotData.accessOrder = new List<List<Point>>();
 
             _oldPoints = new LinkedList<Point>();
-
-
         }
+
         private async Task DrawSolution(
             PlotData plotData,
             Brush pointBrush,
@@ -98,7 +93,6 @@ namespace WSB_Jarvis_Gift_Wrap
                         pictureBox.Invalidate();
                     }
                 }
-
                 else // Włączona wizualizacja
                 {
                     // Rysuj normalne punkty
@@ -109,25 +103,48 @@ namespace WSB_Jarvis_Gift_Wrap
                             _graphics.DrawString("(" + p.X + " , " + p.Y + ")", _font, _pointBrush, p.X + 5, p.Y + 5);
                     }
 
-                    // Rysuj otoczkę
-                    _graphics.FillCircle(chPointBrush, plotData.convexHull.First.Value.X,
-                        plotData.convexHull.First.Value.Y, 5);
-                    var firstPoint = plotData.convexHull.First;
-                    while (firstPoint.Next != null)
+                    //Rysuj otoczkę
+                    if (plotData.convexHull.Count > 0)
                     {
-                        _graphics.DrawLine(chLinePen, firstPoint.Value, firstPoint.Next.Value);
-                        _graphics.FillCircle(chPointBrush, firstPoint.Next.Value.X, firstPoint.Next.Value.Y, 5);
-                        firstPoint = firstPoint.Next;
+                        var chCurrentPoint = plotData.convexHull.First;
+                        var chStart = chCurrentPoint;
+                        // Draw first convex hull point
+                        _graphics.FillCircle(chPointBrush, chCurrentPoint.Value.X, chCurrentPoint.Value.Y, 5);
                         pictureBox.Invalidate();
 
-                        if (_drawIndex < plotData.accessOrder.Count)
-                        {
-                            await Task.Delay((int)(10 * (20 - s_vizualization_speed.Value)));
-                            _drawIndex++;
-                        }
+                        //foreach (var iteration in plotData.accessOrder)
+                        //{
+                        //    foreach (var point in iteration)
+                        //    {
+                        //        //Draw elements which belong to convex hull
+                        //        if (plotData.convexHull.Contains(point))
+                        //        {
+                        //            _graphics.FillCircle(chPointBrush, point.X, point.Y, 5);
+                        //            if (chCurrentPoint.Next.Value != null)
+                        //                _graphics.DrawLine(chLinePen, chCurrentPoint.Value, chCurrentPoint.Next.Value);
+                        //        }
+                        //        else
+                        //        {
+                        //            _graphics.DrawLine(sLinePen, chCurrentPoint.Value, point);
+                        //        }
+
+
+                        //        pictureBox.Invalidate();
+                        //        //Delay
+                        //        await Task.Delay(10 * (20 - s_vizualization_speed.Value));
+                        //        _drawIndex++;
+                        //    }
+
+                        //    chCurrentPoint = chCurrentPoint.Next;
+                        //}
+
+                        _graphics.DrawLine(chLinePen, chCurrentPoint.Value, chStart.Value);
+
+                        // Rysuj linie szukające i punkty z otoczki
+                        foreach (var p in plotData.convexHull)
+                            _graphics.FillCircle(chPointBrush, p.X, p.Y, 5);
+                        pictureBox.Invalidate();
                     }
-                    _graphics.DrawLine(chLinePen, firstPoint.Value, plotData.convexHull.First.Value); // Zamknij otoczkę
-                    pictureBox.Invalidate();
                 }
             }
         }
@@ -140,51 +157,55 @@ namespace WSB_Jarvis_Gift_Wrap
                 _graphics.FillRectangle(
                     b, 0, 0, pictureBox.Width, pictureBox.Height);
             }
+
             pictureBox.Invalidate(); //Redraw
         }
 
         // Przerysuj punkty
         private void RedrawPoints(bool wipe)
         {
-            if (wipe == true)
+            if (wipe)
                 WipePictureBox();
-            foreach (var p in _plotData.points) 
-                _graphics.FillCircle(_pointBrush,p.X,p.Y,5);
-            pictureBox.Invalidate(); 
+            foreach (var p in _plotData.points)
+            {
+                _graphics.FillCircle(_pointBrush, p.X, p.Y, 5);
+                if (_drawText)
+                    _graphics.DrawString("(" + p.X + " , " + p.Y + ")", _font, _pointBrush, p.X + 5, p.Y + 5);
+            }
+
+            pictureBox.Invalidate();
         }
 
         // Przycisk "Uruchom"
         private async void b_Start_Click(object sender, EventArgs e)
-        {   
-            LinkedList<Point> backupPoints = new LinkedList<Point>(_plotData.points);
+        {
+            var backupPoints = new LinkedList<Point>(_plotData.points);
             _plotData.convexHull.Clear();
-            _plotData.accessOrder.Clear();
+            //_plotData.accessOrder.Clear();
             _plotData.points = backupPoints;
             if (_isCalculated == false && _plotData.points.Count > 0)
             {
                 _drawIndex = 0;
                 _isCalculated = true;
 
-                var timer = new Stopwatch(); 
+                var timer = new Stopwatch();
                 timer.Start();
                 await Task.Run(() => _plotData = JarvisAlgorithm.GetConvexHull(ref _plotData));
-                timer.Stop(); 
+                timer.Stop();
                 var timeElapsed = timer.Elapsed.TotalMilliseconds;
 
                 txt_solutionDescription.Text = "";
-                txt_solutionDescription.AppendText("Obliczono w: "+timeElapsed+" ms");
+                txt_solutionDescription.AppendText("Obliczono w: " + timeElapsed + " ms");
                 await DrawSolution(
-                    plotData: _plotData,
-                    pointBrush: _pointBrush,
-                    chPointBrush: _convexHullBrush,
-                    chLinePen: _convexHullPen,
-                    sPointBrush: _searchBrush,
-                    sLinePen: _searchPen);
+                    _plotData,
+                    _pointBrush,
+                    _convexHullBrush,
+                    _convexHullPen,
+                    _searchBrush,
+                    _searchPen);
                 txt_solutionDescription.AppendText("\r\nPunkty należące do otoczki:");
                 foreach (var p in _plotData.convexHull)
-                {
-                    txt_solutionDescription.AppendText("\r\n("+ p.X +" , " + p.Y +")"); 
-                }
+                    txt_solutionDescription.AppendText("\r\n(" + p.X + " , " + p.Y + ")");
 
                 switch (_plotData.convexHull.Count)
                 {
@@ -207,6 +228,7 @@ namespace WSB_Jarvis_Gift_Wrap
                         txt_solutionDescription.AppendText("\r\nOtoczka jest " + _plotData.convexHull.Count + "-kątem");
                         break;
                 }
+
                 pictureBox.Invalidate();
             }
         }
@@ -224,28 +246,28 @@ namespace WSB_Jarvis_Gift_Wrap
             WipePictureBox();
             _plotData.points.Clear();
             _plotData.convexHull.Clear();
-            _plotData.accessOrder.Clear();
+            //_plotData.accessOrder.Clear();
             txt_solutionDescription.Text = "";
             _isCalculated = false;
+            _drawIndex = 0;
         }
 
         // Punkty, przycisk "generuj"
         private void b_GeneratePts_Click(object sender, EventArgs e)
         {
-            Random r = new Random();
-            b_Wipe_Click(sender,e);
+            var r = new Random();
+            b_Wipe_Click(sender, e);
 
-            for (int i = 0; i < e_pointsCount.Value; i++)
-            {
-                _plotData.points.AddLast(new Point(r.Next(0, pictureBox.Width), r.Next(0, pictureBox.Height)));
-            }
+            for (var i = 0; i < e_pointsCount.Value; i++)
+                _plotData.points.AddLast(new Point(r.Next(50, pictureBox.Width - 50),
+                    r.Next(50, pictureBox.Height - 50)));
             RedrawPoints(true);
         }
 
         private void chk_viz_enable(object sender, EventArgs e)
         {
             if (ckh_vizualization.Checked)
-            { 
+            {
                 s_vizualization_speed.Enabled = true;
                 b_Reset_Viz.Enabled = true;
             }
@@ -262,29 +284,24 @@ namespace WSB_Jarvis_Gift_Wrap
             {
                 _drawText = true;
                 await DrawSolution(
-                    plotData: _plotData,
-                    pointBrush: _pointBrush,
-                    chPointBrush: _convexHullBrush,
-                    chLinePen: _convexHullPen,
-                    sPointBrush: _searchBrush,
-                    sLinePen: _searchPen);
+                    _plotData,
+                    _pointBrush,
+                    _convexHullBrush,
+                    _convexHullPen,
+                    _searchBrush,
+                    _searchPen);
             }
             else
             {
                 _drawText = false;
                 await DrawSolution(
-                    plotData: _plotData,
-                    pointBrush: _pointBrush,
-                    chPointBrush: _convexHullBrush,
-                    chLinePen: _convexHullPen,
-                    sPointBrush: _searchBrush,
-                    sLinePen: _searchPen);
+                    _plotData,
+                    _pointBrush,
+                    _convexHullBrush,
+                    _convexHullPen,
+                    _searchBrush,
+                    _searchPen);
             }
-        }
-
-        private void slidebar_viz_speed(object sender, EventArgs e)
-        {
-             
         }
 
         // Akcja przy kliknięciu w płutno
@@ -295,10 +312,11 @@ namespace WSB_Jarvis_Gift_Wrap
                 return;
             _plotData.points.AddLast(newPoint);
             _isCalculated = false;
-            _graphics.FillCircle(_pointBrush, newPoint.X, newPoint.Y,5);
+            _graphics.FillCircle(_pointBrush, newPoint.X, newPoint.Y, 5);
 
             if (_drawText)
-                _graphics.DrawString("(" + newPoint.X + " , " + newPoint.Y + ")", _font, _pointBrush, newPoint.X + 5, newPoint.Y + 5);
+                _graphics.DrawString("(" + newPoint.X + " , " + newPoint.Y + ")", _font, _pointBrush, newPoint.X + 5,
+                    newPoint.Y + 5);
             pictureBox.Invalidate();
         }
 
@@ -315,15 +333,15 @@ namespace WSB_Jarvis_Gift_Wrap
         private void b_createPoint_Click(object sender, EventArgs e)
         {
             var newPoint = new Point((int)e_pCreate_X.Value, (int)e_pCreate_Y.Value);
-            if (_plotData.points.Contains(newPoint))    // Przerwij jeśli punkt już istnieje 
+            if (_plotData.points.Contains(newPoint)) // Przerwij jeśli punkt już istnieje 
                 return;
             _isCalculated = false;
-            _plotData.points.AddLast(newPoint);         // Dodaj i dorysuj ten punkt
+            _plotData.points.AddLast(newPoint); // Dodaj i dorysuj ten punkt
             _graphics.FillCircle(_pointBrush, newPoint.X, newPoint.Y, 5);
             if (_drawText)
-                    _graphics.DrawString("(" + newPoint.X + " , " + newPoint.Y + ")", _font, _pointBrush, newPoint.X + 5, newPoint.Y + 5);
+                _graphics.DrawString("(" + newPoint.X + " , " + newPoint.Y + ")", _font, _pointBrush, newPoint.X + 5,
+                    newPoint.Y + 5);
             pictureBox.Invalidate();
         }
-
     }
 }
