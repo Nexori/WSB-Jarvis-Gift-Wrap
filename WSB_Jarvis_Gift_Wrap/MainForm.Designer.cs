@@ -37,7 +37,6 @@
             this.b_Restart = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.ckh_vizualization = new System.Windows.Forms.CheckBox();
             this.b_createPoint = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -45,6 +44,7 @@
             this.e_pCreate_X = new System.Windows.Forms.NumericUpDown();
             this.e_pCreate_Y = new System.Windows.Forms.NumericUpDown();
             this.txt_solutionDescription = new System.Windows.Forms.TextBox();
+            this.ckh_vizualization = new System.Windows.Forms.CheckBox();
             this.chk_drawCoords = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.s_vizualization_speed)).BeginInit();
@@ -73,6 +73,7 @@
             this.b_Reset_Viz.TabIndex = 2;
             this.b_Reset_Viz.Text = "Wizualizuj od nowa";
             this.b_Reset_Viz.UseVisualStyleBackColor = true;
+            this.b_Reset_Viz.Visible = false;
             this.b_Reset_Viz.Click += new System.EventHandler(this.b_Reset_Click);
             // 
             // pictureBox
@@ -88,20 +89,20 @@
             // s_vizualization_speed
             // 
             this.s_vizualization_speed.Enabled = false;
-            this.s_vizualization_speed.Location = new System.Drawing.Point(932, 454);
+            this.s_vizualization_speed.Location = new System.Drawing.Point(758, 454);
             this.s_vizualization_speed.Maximum = 20;
             this.s_vizualization_speed.Minimum = 1;
             this.s_vizualization_speed.Name = "s_vizualization_speed";
             this.s_vizualization_speed.Size = new System.Drawing.Size(148, 45);
             this.s_vizualization_speed.TabIndex = 5;
             this.s_vizualization_speed.Value = 20;
-            this.s_vizualization_speed.ValueChanged += new System.EventHandler(this.slidebar_viz_speed);
+            this.s_vizualization_speed.Visible = false;
             // 
             // b_GeneratePts
             // 
-            this.b_GeneratePts.Location = new System.Drawing.Point(933, 344);
+            this.b_GeneratePts.Location = new System.Drawing.Point(933, 380);
             this.b_GeneratePts.Name = "b_GeneratePts";
-            this.b_GeneratePts.Size = new System.Drawing.Size(148, 29);
+            this.b_GeneratePts.Size = new System.Drawing.Size(148, 28);
             this.b_GeneratePts.TabIndex = 7;
             this.b_GeneratePts.Text = "Generuj punkty";
             this.b_GeneratePts.UseVisualStyleBackColor = true;
@@ -110,7 +111,7 @@
             // e_pointsCount
             // 
             this.e_pointsCount.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.e_pointsCount.Location = new System.Drawing.Point(933, 379);
+            this.e_pointsCount.Location = new System.Drawing.Point(933, 415);
             this.e_pointsCount.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -140,35 +141,26 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(929, 486);
+            this.label1.Location = new System.Drawing.Point(755, 486);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(38, 13);
             this.label1.TabIndex = 12;
             this.label1.Text = "Powoli";
+            this.label1.Visible = false;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1053, 486);
+            this.label2.Location = new System.Drawing.Point(864, 486);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 13;
             this.label2.Text = "Szybko";
-            // 
-            // ckh_vizualization
-            // 
-            this.ckh_vizualization.AutoSize = true;
-            this.ckh_vizualization.Location = new System.Drawing.Point(932, 431);
-            this.ckh_vizualization.Name = "ckh_vizualization";
-            this.ckh_vizualization.Size = new System.Drawing.Size(117, 17);
-            this.ckh_vizualization.TabIndex = 16;
-            this.ckh_vizualization.Text = "Włącz wizualizację";
-            this.ckh_vizualization.UseVisualStyleBackColor = true;
-            this.ckh_vizualization.CheckedChanged += new System.EventHandler(this.chk_viz_enable);
+            this.label2.Visible = false;
             // 
             // b_createPoint
             // 
-            this.b_createPoint.Location = new System.Drawing.Point(933, 581);
+            this.b_createPoint.Location = new System.Drawing.Point(933, 585);
             this.b_createPoint.Name = "b_createPoint";
             this.b_createPoint.Size = new System.Drawing.Size(148, 23);
             this.b_createPoint.TabIndex = 19;
@@ -179,7 +171,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(933, 526);
+            this.label3.Location = new System.Drawing.Point(933, 530);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(138, 26);
             this.label3.TabIndex = 20;
@@ -188,7 +180,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(933, 558);
+            this.label4.Location = new System.Drawing.Point(933, 562);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(17, 13);
             this.label4.TabIndex = 21;
@@ -197,7 +189,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(1009, 558);
+            this.label5.Location = new System.Drawing.Point(1009, 562);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(17, 13);
             this.label5.TabIndex = 22;
@@ -206,7 +198,7 @@
             // e_pCreate_X
             // 
             this.e_pCreate_X.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.e_pCreate_X.Location = new System.Drawing.Point(948, 555);
+            this.e_pCreate_X.Location = new System.Drawing.Point(948, 559);
             this.e_pCreate_X.Maximum = new decimal(new int[] {
             914,
             0,
@@ -224,7 +216,7 @@
             // e_pCreate_Y
             // 
             this.e_pCreate_Y.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.e_pCreate_Y.Location = new System.Drawing.Point(1023, 555);
+            this.e_pCreate_Y.Location = new System.Drawing.Point(1023, 559);
             this.e_pCreate_Y.Maximum = new decimal(new int[] {
             595,
             0,
@@ -241,7 +233,7 @@
             // 
             // txt_solutionDescription
             // 
-            this.txt_solutionDescription.Location = new System.Drawing.Point(933, 118);
+            this.txt_solutionDescription.Location = new System.Drawing.Point(933, 83);
             this.txt_solutionDescription.MinimumSize = new System.Drawing.Size(4, 20);
             this.txt_solutionDescription.Multiline = true;
             this.txt_solutionDescription.Name = "txt_solutionDescription";
@@ -250,12 +242,24 @@
             this.txt_solutionDescription.Size = new System.Drawing.Size(148, 220);
             this.txt_solutionDescription.TabIndex = 26;
             // 
+            // ckh_vizualization
+            // 
+            this.ckh_vizualization.AutoSize = true;
+            this.ckh_vizualization.Location = new System.Drawing.Point(758, 444);
+            this.ckh_vizualization.Name = "ckh_vizualization";
+            this.ckh_vizualization.Size = new System.Drawing.Size(117, 17);
+            this.ckh_vizualization.TabIndex = 16;
+            this.ckh_vizualization.Text = "Włącz wizualizację";
+            this.ckh_vizualization.UseVisualStyleBackColor = true;
+            this.ckh_vizualization.Visible = false;
+            this.ckh_vizualization.CheckedChanged += new System.EventHandler(this.chk_viz_enable);
+            // 
             // chk_drawCoords
             // 
             this.chk_drawCoords.AutoSize = true;
             this.chk_drawCoords.Checked = true;
             this.chk_drawCoords.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chk_drawCoords.Location = new System.Drawing.Point(933, 408);
+            this.chk_drawCoords.Location = new System.Drawing.Point(933, 444);
             this.chk_drawCoords.Name = "chk_drawCoords";
             this.chk_drawCoords.Size = new System.Drawing.Size(116, 17);
             this.chk_drawCoords.TabIndex = 27;
@@ -312,7 +316,6 @@
         private System.Windows.Forms.Button b_Restart;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.CheckBox ckh_vizualization;
         private System.Windows.Forms.Button b_createPoint;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
@@ -320,6 +323,7 @@
         private System.Windows.Forms.NumericUpDown e_pCreate_X;
         private System.Windows.Forms.NumericUpDown e_pCreate_Y;
         private System.Windows.Forms.TextBox txt_solutionDescription;
+        private System.Windows.Forms.CheckBox ckh_vizualization;
         private System.Windows.Forms.CheckBox chk_drawCoords;
     }
 }
