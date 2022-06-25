@@ -8,10 +8,12 @@ namespace JarvisAlgorithmLib
     {
         public LinkedList<Point> points;
         public LinkedList<Point> convexHull;
+
     }
 
     public static class JarvisAlgorithm
     {
+
         // Mając 3 współiniowe punkty: p, q, r, funkcja sprawdza czy punkt q
         // leży na odcinku 'pr' 
         public static bool isColinear(Point p, Point q, Point r)
@@ -51,7 +53,6 @@ namespace JarvisAlgorithmLib
                 plotData.convexHull = plotData.points;
                 return plotData;
             }
-
             // Weź punkt położony najniżej po lewej stronie
             var lastPoint = GetLowestLeftPoint(plotData);
 
@@ -93,6 +94,7 @@ namespace JarvisAlgorithmLib
                 lastPoint = currentPoint;
             }
             // Przywróć punkty do zbioru punktów
+
             plotData.points = oldData;
             return plotData;
         }
