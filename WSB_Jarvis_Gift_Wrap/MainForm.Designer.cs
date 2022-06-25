@@ -113,7 +113,7 @@
             this.e_pointsCount.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.e_pointsCount.Location = new System.Drawing.Point(933, 415);
             this.e_pointsCount.Maximum = new decimal(new int[] {
-            100000,
+            1000000000,
             0,
             0,
             0});

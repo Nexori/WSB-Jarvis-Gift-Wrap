@@ -4,27 +4,18 @@ using System.Drawing;
 
 namespace JarvisAlgorithmLib
 {
-    public struct PlotData : ICloneable
+    public struct PlotData
     {
         public LinkedList<Point> points;
         public LinkedList<Point> convexHull;
-        //public List<List<Point>> accessOrder;
 
-        public object Clone()
-        {
-            return new PlotData
-            {
-                points = points,
-                convexHull = convexHull,
-                //accessOrder = accessOrder
-            };
-        }
     }
 
     public static class JarvisAlgorithm
     {
-        // Given three colinear points p, q, r, the function checks if 
-        // point q lies on line segment 'pr' 
+
+        // Mając 3 współiniowe punkty: p, q, r, funkcja sprawdza czy punkt q
+        // leży na odcinku 'pr' 
         public static bool isColinear(Point p, Point q, Point r)
         {
             return q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) &&
@@ -54,50 +45,55 @@ namespace JarvisAlgorithmLib
 
         public static PlotData GetConvexHull(ref PlotData plotData)
         {
-            var oldData = new LinkedList<Point>(plotData.points);
-
-            if (plotData.points.Count <= 3)
-            {
+            //Zapisz dane wejściowe aby ich nie utracić
+            LinkedList<Point> oldData = new LinkedList<Point>(plotData.points);
+            
+            // Jeśli są mniej niż 4 punkty, zwróć te punkty jako otoczkę i nie wykonuj dalej algorytmu
+            if (plotData.points.Count <= 3) {
                 plotData.convexHull = plotData.points;
                 return plotData;
             }
-
+            // Weź punkt położony najniżej po lewej stronie
             var lastPoint = GetLowestLeftPoint(plotData);
+
+            // Dodaj ten punkt jako pierwszy z otoczki
             plotData.convexHull.AddLast(lastPoint);
-            // Get the convex loop 
             while (true)
             {
-                var currentPoint = plotData.points.First.Value;
-                var currentIteration = new List<Point>();
+                // Weź pierwszy punkt ze zbioru jako obecny punkt
+                var currentPoint = plotData.points.First.Value; 
 
+                // Dla każdego punktu w zbiorze punktów
                 foreach (var iteratedPoint in plotData.points)
                 {
+                    // Jeśli aktualnie testowany punkt jest na lewo od obecnego punktu
+                    // zastąp obecny punkt, punktem z aktualnej iteracji.
                     if (GetDirection(lastPoint, iteratedPoint, currentPoint) == 2)
                         currentPoint = iteratedPoint;
+                    // Jeśli aktualnie testowany punkt jest współliniowy z poprzednim i obecnym, oraz
+                    // leży na odcinku między punktem z poprzedniej iteracji a obecnym punktem z tej iteracji,
+                    // i jeśli aktualnie testowany punkt nie jest punktem z poprzedniej iteracji,
+                    // zastąp obecny punkt, punktem z aktualnej iteracji.
                     if (GetDirection(lastPoint, iteratedPoint, currentPoint) == 0 &&
                         isColinear(lastPoint, currentPoint, iteratedPoint) &&
                         iteratedPoint != lastPoint)
                         currentPoint = iteratedPoint;
-                    currentIteration.Add(iteratedPoint);
                 }
 
-                // If current point is the same as the first point of the convex hull, it means we have a circle.
+                // Jeśli obecny punkt jest taki sam jak pierwszy punkt z otoczki, oznacza to że zatoczyliśmy koło, przerwij pętle.
                 if (currentPoint == plotData.convexHull.First.Value)
                     break;
 
-                // Add current point to detected convex hull
+                // Dodaj obecny punkt do zbioru dla otoczki
                 plotData.convexHull.AddLast(currentPoint);
 
-                // Remove current point from the general pool of points
+                // Usuń obecny punkt z puli iterowalnych punktów
                 plotData.points.Remove(currentPoint);
 
-                // Update lastPoint for next iteration
+                // Zauktualizuj 'stary' punkt
                 lastPoint = currentPoint;
-
-                // Save current iteration access order 
-                //plotData.accessOrder.
-                //plotData.accessOrder.Add(currentIteration);
             }
+            // Przywróć punkty do zbioru punktów
 
             plotData.points = oldData;
             return plotData;
