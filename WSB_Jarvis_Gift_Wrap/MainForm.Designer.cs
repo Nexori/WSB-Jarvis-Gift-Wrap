@@ -31,12 +31,9 @@
             this.b_Start = new System.Windows.Forms.Button();
             this.b_Reset_Viz = new System.Windows.Forms.Button();
             this.pictureBox = new System.Windows.Forms.PictureBox();
-            this.s_vizualization_speed = new System.Windows.Forms.TrackBar();
             this.b_GeneratePts = new System.Windows.Forms.Button();
             this.e_pointsCount = new System.Windows.Forms.NumericUpDown();
             this.b_Restart = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.b_createPoint = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -44,10 +41,8 @@
             this.e_pCreate_X = new System.Windows.Forms.NumericUpDown();
             this.e_pCreate_Y = new System.Windows.Forms.NumericUpDown();
             this.txt_solutionDescription = new System.Windows.Forms.TextBox();
-            this.ckh_vizualization = new System.Windows.Forms.CheckBox();
             this.chk_drawCoords = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.s_vizualization_speed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.e_pointsCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.e_pCreate_X)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.e_pCreate_Y)).BeginInit();
@@ -86,18 +81,6 @@
             this.pictureBox.TabStop = false;
             this.pictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox_Click);
             // 
-            // s_vizualization_speed
-            // 
-            this.s_vizualization_speed.Enabled = false;
-            this.s_vizualization_speed.Location = new System.Drawing.Point(758, 454);
-            this.s_vizualization_speed.Maximum = 20;
-            this.s_vizualization_speed.Minimum = 1;
-            this.s_vizualization_speed.Name = "s_vizualization_speed";
-            this.s_vizualization_speed.Size = new System.Drawing.Size(148, 45);
-            this.s_vizualization_speed.TabIndex = 5;
-            this.s_vizualization_speed.Value = 20;
-            this.s_vizualization_speed.Visible = false;
-            // 
             // b_GeneratePts
             // 
             this.b_GeneratePts.Location = new System.Drawing.Point(933, 380);
@@ -113,7 +96,7 @@
             this.e_pointsCount.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.e_pointsCount.Location = new System.Drawing.Point(933, 415);
             this.e_pointsCount.Maximum = new decimal(new int[] {
-            1000000000,
+            1000000,
             0,
             0,
             0});
@@ -137,26 +120,6 @@
             this.b_Restart.Text = "Restart";
             this.b_Restart.UseVisualStyleBackColor = true;
             this.b_Restart.Click += new System.EventHandler(this.b_Wipe_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(755, 486);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 13);
-            this.label1.TabIndex = 12;
-            this.label1.Text = "Powoli";
-            this.label1.Visible = false;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(864, 486);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(42, 13);
-            this.label2.TabIndex = 13;
-            this.label2.Text = "Szybko";
-            this.label2.Visible = false;
             // 
             // b_createPoint
             // 
@@ -242,18 +205,6 @@
             this.txt_solutionDescription.Size = new System.Drawing.Size(148, 220);
             this.txt_solutionDescription.TabIndex = 26;
             // 
-            // ckh_vizualization
-            // 
-            this.ckh_vizualization.AutoSize = true;
-            this.ckh_vizualization.Location = new System.Drawing.Point(758, 444);
-            this.ckh_vizualization.Name = "ckh_vizualization";
-            this.ckh_vizualization.Size = new System.Drawing.Size(117, 17);
-            this.ckh_vizualization.TabIndex = 16;
-            this.ckh_vizualization.Text = "Włącz wizualizację";
-            this.ckh_vizualization.UseVisualStyleBackColor = true;
-            this.ckh_vizualization.Visible = false;
-            this.ckh_vizualization.CheckedChanged += new System.EventHandler(this.chk_viz_enable);
-            // 
             // chk_drawCoords
             // 
             this.chk_drawCoords.AutoSize = true;
@@ -281,13 +232,9 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.b_createPoint);
-            this.Controls.Add(this.ckh_vizualization);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.b_Restart);
             this.Controls.Add(this.e_pointsCount);
             this.Controls.Add(this.b_GeneratePts);
-            this.Controls.Add(this.s_vizualization_speed);
             this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.b_Reset_Viz);
             this.Controls.Add(this.b_Start);
@@ -297,7 +244,6 @@
             this.Text = "Wizualizacja algorytmu otoczki wypukłej";
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.s_vizualization_speed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.e_pointsCount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.e_pCreate_X)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.e_pCreate_Y)).EndInit();
@@ -310,12 +256,9 @@
         private System.Windows.Forms.Button b_Start;
         private System.Windows.Forms.Button b_Reset_Viz;
         private System.Windows.Forms.PictureBox pictureBox;
-        private System.Windows.Forms.TrackBar s_vizualization_speed;
         private System.Windows.Forms.Button b_GeneratePts;
         private System.Windows.Forms.NumericUpDown e_pointsCount;
         private System.Windows.Forms.Button b_Restart;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button b_createPoint;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
@@ -323,7 +266,6 @@
         private System.Windows.Forms.NumericUpDown e_pCreate_X;
         private System.Windows.Forms.NumericUpDown e_pCreate_Y;
         private System.Windows.Forms.TextBox txt_solutionDescription;
-        private System.Windows.Forms.CheckBox ckh_vizualization;
         private System.Windows.Forms.CheckBox chk_drawCoords;
     }
 }

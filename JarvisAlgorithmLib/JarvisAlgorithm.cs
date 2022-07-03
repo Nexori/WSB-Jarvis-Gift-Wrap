@@ -49,7 +49,7 @@ namespace JarvisAlgorithmLib
             LinkedList<Point> oldData = new LinkedList<Point>(plotData.points);
             
             // Jeśli są mniej niż 4 punkty, zwróć te punkty jako otoczkę i nie wykonuj dalej algorytmu
-            if (plotData.points.Count <= 3) {
+            if (plotData.points.Count <= 2) {
                 plotData.convexHull = plotData.points;
                 return plotData;
             }
